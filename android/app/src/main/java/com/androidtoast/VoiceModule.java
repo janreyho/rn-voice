@@ -10,12 +10,12 @@ import com.facebook.react.uimanager.IllegalViewOperationException;
 import java.util.Map;
 import java.util.HashMap;
 
-public class ToastModule extends ReactContextBaseJavaModule {
+public class VoiceModule extends ReactContextBaseJavaModule {
 
     private static final String DURATION_SHORT_KEY = "SHORT";
     private static final String DURATION_LONG_KEY = "LONG";
 
-    public ToastModule(ReactApplicationContext reactContext) {
+    public VoiceModule(ReactApplicationContext reactContext) {
         super(reactContext);
     }
 

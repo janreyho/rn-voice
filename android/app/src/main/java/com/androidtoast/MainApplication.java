@@ -23,7 +23,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-          new ExampleReactPackage() // 这个类是我们创建的
+          new VoicePackage() // 这个类是我们创建的
       );
     }
 
