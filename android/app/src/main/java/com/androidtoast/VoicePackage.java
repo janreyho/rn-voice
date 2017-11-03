@@ -21,16 +21,16 @@ public class VoicePackage implements ReactPackage {
     }
 
     @Override
-    public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
+    public List<ViewManager> createViewManagers(ReactApplicationContext reactApplicationContext) {
         return Collections.emptyList();
     }
 
     @Override
     public List<NativeModule> createNativeModules(
-            ReactApplicationContext reactContext) {
+            ReactApplicationContext reactApplicationContext) {
         List<NativeModule> modules = new ArrayList<>();
 
-        modules.add(new VoiceModule(reactContext));
+        modules.add(new VoiceModule(reactApplicationContext));
 
         return modules;
     }
