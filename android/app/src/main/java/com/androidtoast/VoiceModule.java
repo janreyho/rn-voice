@@ -64,30 +64,47 @@ public class VoiceModule extends ReactContextBaseJavaModule{
                     WritableMap event = Arguments.createMap();
                     event.putBoolean("error", false);
                     sendEvent("onSpeechStart", event);
-                    Log.d("ASR", "onBeginningOfSpeech()");
+                    Log.d("ASR", "onSpeechStart()");
                }
+            if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_BEGIN)) {
+                WritableMap event = Arguments.createMap();
+                event.putBoolean("error", false);
+                sendEvent("onSpeechRecognized", event);
+                Log.d("ASR", "onSpeechRecognized()");
+           }
            if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_FINISH)) {
                 WritableMap event = Arguments.createMap();
                 event.putBoolean("error", false);
                 sendEvent("onSpeechEnd", event);
-                Log.d("ASR", "onEndOfSpeech()");
+                Log.d("ASR", "onSpeechEnd()");
                 isRecognizing = false;
            }
             if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL)) {
                 WritableArray arr = Arguments.createArray();
-
-                // ArrayList<String> matches = s1.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                // for (String result : matches) {
-                //   arr.pushString(result);
-                // }
                 String obj = getMatcher(s1, MatcherRegex.RESULT, 1);
                 arr.pushString(obj);
 
                 WritableMap event = Arguments.createMap();
                 event.putArray("value", arr);
                 sendEvent("onSpeechPartialResults", event);
-                Log.d("ASR", "onPartialResults()");
+                Log.d("ASR", "onSpeechPartialResults()");
             }
+            if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_END)) {
+                WritableArray arr = Arguments.createArray();
+                String obj = getMatcher(s1, MatcherRegex.RESULT, 1);
+                arr.pushString(obj);
+
+                WritableMap event = Arguments.createMap();
+                event.putArray("value", arr);
+                sendEvent("onSpeechResults", event);
+                Log.d("ASR", "onSpeechResults()");
+           }
+            if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_VOLUME)) {
+                WritableMap event = Arguments.createMap();
+                event.putDouble("value", (double) 11);
+                sendEvent("onSpeechVolumeChanged", event);
+                Log.d("ASR", "onSpeechVolumeChanged()");
+           }
         }
     });
 
