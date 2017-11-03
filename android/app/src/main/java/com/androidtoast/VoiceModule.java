@@ -100,10 +100,17 @@ public class VoiceModule extends ReactContextBaseJavaModule{
                 Log.d("ASR", "onSpeechResults()");
            }
             if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_VOLUME)) {
-                WritableMap event = Arguments.createMap();
-                event.putDouble("value", (double) 11);
-                sendEvent("onSpeechVolumeChanged", event);
-                Log.d("ASR", "onSpeechVolumeChanged()");
+//                RecogResult _rr = RecogResult.parseJson(s1);
+                try{
+                    JSONObject _obj = new JSONObject(s1);
+                    double _vol = (int)_obj.get("volume-percent");
+                    WritableMap event = Arguments.createMap();
+                    event.putDouble("value", _vol);
+                    sendEvent("onSpeechVolumeChanged", event);
+                    Log.d("ASR", "onSpeechVolumeChanged()");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
            }
         }
     });
@@ -204,7 +211,7 @@ public class VoiceModule extends ReactContextBaseJavaModule{
       @Override
       public void run() {
         try {
-          // speech.cancel();
+          eventManager.send(SpeechConstant.ASR_CANCEL, null, null, 0, 0);
           isRecognizing = false;
           callback.invoke(false);
         } catch(Exception e) {
@@ -221,8 +228,7 @@ public class VoiceModule extends ReactContextBaseJavaModule{
       @Override
       public void run() {
         try {
-          // speech.destroy();
-          // speech = null;
+          eventManager.send(SpeechConstant.ASR_STOP, null, null, 0, 0);
           isRecognizing = false;
           callback.invoke(false);
         } catch(Exception e) {
