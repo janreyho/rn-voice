@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.speech.RecognitionListener;
-import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -24,22 +21,92 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.modules.core.PermissionListener;
 
+
+import android.app.Activity;
+import android.os.Message;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.TextView;
+
+import com.baidu.speech.EventListener;
+import com.baidu.speech.EventManager;
+import com.baidu.speech.EventManagerFactory;
+import com.baidu.speech.asr.SpeechConstant;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Locale;
 
 import javax.annotation.Nullable;
 
-public class VoiceModule extends ReactContextBaseJavaModule implements RecognitionListener {
+public class VoiceModule extends ReactContextBaseJavaModule{
 
   final ReactApplicationContext reactContext;
-  private SpeechRecognizer speech = null;
+  EventManager eventManager;
   private boolean isRecognizing = false;
   private String locale = null;
 
   public VoiceModule(ReactApplicationContext reactContext) {
     super(reactContext);
     this.reactContext = reactContext;
+
+    eventManager = EventManagerFactory.create(this.reactContext ,"asr");
+    eventManager.registerListener(new EventListener() {
+        @Override
+        public void onEvent(String name, String s1, byte[] bytes, int i, int i1) {
+            if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_READY)) {
+                    WritableMap event = Arguments.createMap();
+                    event.putBoolean("error", false);
+                    sendEvent("onSpeechStart", event);
+                    Log.d("ASR", "onBeginningOfSpeech()");
+               }
+           if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_FINISH)) {
+                WritableMap event = Arguments.createMap();
+                event.putBoolean("error", false);
+                sendEvent("onSpeechEnd", event);
+                Log.d("ASR", "onEndOfSpeech()");
+                isRecognizing = false;
+           }
+            if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL)) {
+                WritableArray arr = Arguments.createArray();
+
+                // ArrayList<String> matches = s1.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                // for (String result : matches) {
+                //   arr.pushString(result);
+                // }
+                String obj = getMatcher(s1, MatcherRegex.RESULT, 1);
+                arr.pushString(obj);
+
+                WritableMap event = Arguments.createMap();
+                event.putArray("value", arr);
+                sendEvent("onSpeechPartialResults", event);
+                Log.d("ASR", "onPartialResults()");
+            }
+        }
+    });
+
   }
+
+    static class MatcherRegex {
+        public static final String RESULT = ".*\\{\"word\":\\[\"(.*?)\"\\]\\}.*";
+    }
+
+    private String getMatcher(String info,String regex, int index) {
+        Matcher m = Pattern.compile(regex).matcher(info);
+        m.find();
+        try {
+            return m.group(index);
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
 
   private String getLocale(String locale) {
     if (locale != null && !locale.equals("")) {
@@ -49,64 +116,6 @@ public class VoiceModule extends ReactContextBaseJavaModule implements Recogniti
     return Locale.getDefault().toString();
   }
 
-  private void startListening(ReadableMap opts) {
-    if (speech != null) {
-      speech.destroy();
-      speech = null;
-    }
-    speech = SpeechRecognizer.createSpeechRecognizer(this.reactContext);
-    speech.setRecognitionListener(this);
-
-    final Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-
-    // Load the intent with options from JS
-    ReadableMapKeySetIterator iterator = opts.keySetIterator();
-    while (iterator.hasNextKey()) {
-      String key = iterator.nextKey();
-      switch (key) {
-        case "EXTRA_LANGUAGE_MODEL":
-          switch (opts.getString(key)) {
-            case "LANGUAGE_MODEL_FREE_FORM":
-              intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-              break;
-            case "LANGUAGE_MODEL_WEB_SEARCH":
-              intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-              break;
-            default:
-              intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-              break;
-          }
-          break;
-        case "EXTRA_MAX_RESULTS": {
-          Double extras = opts.getDouble(key);
-          intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, extras.intValue());
-          break;
-        }
-        case "EXTRA_PARTIAL_RESULTS": {
-          intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, opts.getBoolean(key));
-          break;
-        }
-        case "EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS": {
-          Double extras = opts.getDouble(key);
-          intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, extras.intValue());
-          break;
-        }
-        case "EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS": {
-          Double extras = opts.getDouble(key);
-          intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, extras.intValue());
-          break;
-        }
-        case "EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS": {
-          Double extras = opts.getDouble(key);
-          intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, extras.intValue());
-          break;
-        }
-      }
-    }
-
-    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, getLocale(this.locale));
-    speech.startListening(intent);
-  }
 
   @Override
   public String getName() {
@@ -142,7 +151,9 @@ public class VoiceModule extends ReactContextBaseJavaModule implements Recogniti
       @Override
       public void run() {
         try {
-          startListening(opts);
+          Log.d("ASR", "11startListening()");
+           String json = "{\"accept-audio-data\":false,\"disable-punctuation\":false,\"accept-audio-volume\":true,\"pid\":1536}";
+           eventManager.send(SpeechConstant.ASR_START, json, null, 0, 0);
           isRecognizing = true;
           callback.invoke(false);
         } catch (Exception e) {
@@ -159,7 +170,7 @@ public class VoiceModule extends ReactContextBaseJavaModule implements Recogniti
       @Override
       public void run() {
         try {
-          speech.stopListening();
+          eventManager.send(SpeechConstant.ASR_STOP, null, null, 0, 0);
           isRecognizing = false;
           callback.invoke(false);
         } catch(Exception e) {
@@ -176,7 +187,7 @@ public class VoiceModule extends ReactContextBaseJavaModule implements Recogniti
       @Override
       public void run() {
         try {
-          speech.cancel();
+          // speech.cancel();
           isRecognizing = false;
           callback.invoke(false);
         } catch(Exception e) {
@@ -193,8 +204,8 @@ public class VoiceModule extends ReactContextBaseJavaModule implements Recogniti
       @Override
       public void run() {
         try {
-          speech.destroy();
-          speech = null;
+          // speech.destroy();
+          // speech = null;
           isRecognizing = false;
           callback.invoke(false);
         } catch(Exception e) {
@@ -212,8 +223,8 @@ public class VoiceModule extends ReactContextBaseJavaModule implements Recogniti
       @Override
       public void run() {
         try {
-          Boolean isSpeechAvailable = SpeechRecognizer.isRecognitionAvailable(self.reactContext);
-          callback.invoke(isSpeechAvailable, false);
+          // Boolean isSpeechAvailable = SpeechRecognizer.isRecognitionAvailable(self.reactContext);
+          // callback.invoke(isSpeechAvailable, false);
         } catch(Exception e) {
           callback.invoke(false, e.getMessage());
         }
@@ -238,124 +249,4 @@ public class VoiceModule extends ReactContextBaseJavaModule implements Recogniti
       .emit(eventName, params);
   }
 
-  @Override
-  public void onBeginningOfSpeech() {
-    WritableMap event = Arguments.createMap();
-    event.putBoolean("error", false);
-    sendEvent("onSpeechStart", event);
-    Log.d("ASR", "onBeginningOfSpeech()");
-  }
-
-  @Override
-  public void onBufferReceived(byte[] buffer) {
-    WritableMap event = Arguments.createMap();
-    event.putBoolean("error", false);
-    sendEvent("onSpeechRecognized", event);
-    Log.d("ASR", "onBufferReceived()");
-  }
-
-  @Override
-  public void onEndOfSpeech() {
-    WritableMap event = Arguments.createMap();
-    event.putBoolean("error", false);
-    sendEvent("onSpeechEnd", event);
-    Log.d("ASR", "onEndOfSpeech()");
-    isRecognizing = false;
-  }
-
-  @Override
-  public void onError(int errorCode) {
-    String errorMessage = String.format("%d/%s", errorCode, getErrorText(errorCode));
-    WritableMap error = Arguments.createMap();
-    error.putString("message", errorMessage);
-    WritableMap event = Arguments.createMap();
-    event.putMap("error", error);
-    sendEvent("onSpeechError", event);
-    Log.d("ASR", "onError() - " + errorMessage);
-  }
-
-  @Override
-  public void onEvent(int arg0, Bundle arg1) { }
-
-  @Override
-  public void onPartialResults(Bundle results) {
-    WritableArray arr = Arguments.createArray();
-
-    ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-    for (String result : matches) {
-      arr.pushString(result);
-    }
-
-    WritableMap event = Arguments.createMap();
-    event.putArray("value", arr);
-    sendEvent("onSpeechPartialResults", event);
-    Log.d("ASR", "onPartialResults()");
-  }
-
-  @Override
-  public void onReadyForSpeech(Bundle arg0) {
-    WritableMap event = Arguments.createMap();
-    event.putBoolean("error", false);
-    sendEvent("onSpeechStart", event);
-    Log.d("ASR", "onReadyForSpeech()");
-  }
-
-  @Override
-  public void onResults(Bundle results) {
-    WritableArray arr = Arguments.createArray();
-
-    ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-    for (String result : matches) {
-      arr.pushString(result);
-    }
-
-    WritableMap event = Arguments.createMap();
-    event.putArray("value", arr);
-    sendEvent("onSpeechResults", event);
-    Log.d("ASR", "onResults()");
-  }
-
-  @Override
-  public void onRmsChanged(float rmsdB) {
-    WritableMap event = Arguments.createMap();
-    event.putDouble("value", (double) rmsdB);
-    sendEvent("onSpeechVolumeChanged", event);
-  }
-
-  public static String getErrorText(int errorCode) {
-    String message;
-    switch (errorCode) {
-      case SpeechRecognizer.ERROR_AUDIO:
-        message = "Audio recording error";
-        break;
-      case SpeechRecognizer.ERROR_CLIENT:
-        message = "Client side error";
-        break;
-      case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
-        message = "Insufficient permissions";
-        break;
-      case SpeechRecognizer.ERROR_NETWORK:
-        message = "Network error";
-        break;
-      case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
-        message = "Network timeout";
-        break;
-      case SpeechRecognizer.ERROR_NO_MATCH:
-        message = "No match";
-        break;
-      case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
-        message = "RecognitionService busy";
-        break;
-      case SpeechRecognizer.ERROR_SERVER:
-        message = "error from server";
-        break;
-      case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
-        message = "No speech input";
-        break;
-      default:
-        message = "Didn't understand, please try again.";
-        break;
-    }
-    return message;
-  }
 }
