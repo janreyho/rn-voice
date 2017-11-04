@@ -1,4 +1,4 @@
-package com.androidtoast; //包名
+package com.androidtoast.recognization; //包名
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,7 +17,7 @@ public class RecogResult {
     private String desc;
     private String resultType;
     private int error = -1;
-    private int subError = -1;
+    private static int subError = -1;
 
     public static RecogResult parseJson(String jsonStr) {
         RecogResult result = new RecogResult();
@@ -25,7 +25,7 @@ public class RecogResult {
         try {
             JSONObject json = new JSONObject(jsonStr);
             int error = json.optInt("error");
-            int subError = json.optInt("sub_error");
+            subError = json.optInt("sub_error");
             result.setError(error);
             result.setDesc(json.optString("desc"));
             result.setResultType(json.optString("result_type"));

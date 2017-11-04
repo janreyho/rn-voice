@@ -1,9 +1,10 @@
 package com.androidtoast; //包名
 
+import com.androidtoast.recognization.RecogResult;
+import com.androidtoast.control.ErrorTranslation;
+
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -15,20 +16,10 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.modules.core.PermissionListener;
-
-
-import android.app.Activity;
-import android.os.Message;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.TextView;
 
 import com.baidu.speech.EventListener;
 import com.baidu.speech.EventManager;
@@ -38,7 +29,6 @@ import com.baidu.speech.asr.SpeechConstant;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Locale;
@@ -73,11 +63,24 @@ public class VoiceModule extends ReactContextBaseJavaModule{
                 Log.d("ASR", "onSpeechRecognized()");
            }
            if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_FINISH)) {
+                RecogResult recogResult = RecogResult.parseJson(s1);
                 WritableMap event = Arguments.createMap();
-                event.putBoolean("error", false);
-                sendEvent("onSpeechEnd", event);
-                Log.d("ASR", "onSpeechEnd()");
-                isRecognizing = false;
+                if (recogResult.hasError()) {
+                    int errorCode = recogResult.getError();
+                    int subErrorCode = recogResult.getSubError();
+                    String errorMessage = String.format("%d/%s", subErrorCode, ErrorTranslation.recogError(errorCode));
+                    WritableMap error = Arguments.createMap();
+                    error.putString("message", errorMessage);
+                    event.putMap("error", error);
+                    sendEvent("onSpeechError", event);
+                    Log.d("ASR", "onSpeechError() - " + errorMessage);
+                }else{
+                    event.putBoolean("error", false);
+                    sendEvent("onSpeechEnd", event);
+                    Log.d("ASR", "onSpeechEnd()");
+                    isRecognizing = false;
+                }
+
            }
             if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL)) {
                 WritableArray arr = Arguments.createArray();
@@ -86,8 +89,16 @@ public class VoiceModule extends ReactContextBaseJavaModule{
 
                 WritableMap event = Arguments.createMap();
                 event.putArray("value", arr);
-                sendEvent("onSpeechPartialResults", event);
-                Log.d("ASR", "onSpeechPartialResults()");
+
+                RecogResult _rr = RecogResult.parseJson(s1);
+                String[] results = _rr.getResultsRecognition();
+                if (_rr.isFinalResult()) {
+                    sendEvent("onSpeechResults", event);
+                    Log.d("ASR", "onSpeechResults()");
+                }else if (_rr.isPartialResult()){
+                    sendEvent("onSpeechPartialResults", event);
+                    Log.d("ASR", "onSpeechPartialResults()");
+                }
             }
             if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_END)) {
                 WritableArray arr = Arguments.createArray();
