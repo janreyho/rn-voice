@@ -1,4 +1,4 @@
-package com.janreyho.voicedemo.recognization;
+package com.janreyho.voice.recognization;
 
 /**
  * Created by fujiayi on 2017/6/14.
@@ -6,7 +6,7 @@ package com.janreyho.voicedemo.recognization;
 
 import android.util.Log;
 
-import com.janreyho.voicedemo.util.Logger;
+import com.janreyho.voice.util.Logger;
 
 public class StatusRecogListener implements IRecogListener, IStatus {
 

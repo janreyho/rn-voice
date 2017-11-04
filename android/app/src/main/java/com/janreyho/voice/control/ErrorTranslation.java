@@ -1,4 +1,4 @@
-package com.janreyho.voicedemo.control;
+package com.janreyho.voice.control;
 
 import android.speech.SpeechRecognizer;
 

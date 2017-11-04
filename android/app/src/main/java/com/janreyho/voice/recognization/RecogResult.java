@@ -1,4 +1,4 @@
-package com.janreyho.voicedemo.recognization; //包名
+package com.janreyho.voice.recognization; //包名
 
 import org.json.JSONArray;
 import org.json.JSONException;
