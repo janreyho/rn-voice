@@ -1,3 +1,3 @@
-rootProject.name = 'voicetest'
+rootProject.name = 'voicedemo'
 
 include ':app'

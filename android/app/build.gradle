@@ -98,7 +98,7 @@ android {
     buildToolsVersion '26.0.2'
 
     defaultConfig {
-        applicationId "com.voicetest"
+        applicationId "com.janreyho.voicedemo"
         minSdkVersion 16
         targetSdkVersion 22
         versionCode 1

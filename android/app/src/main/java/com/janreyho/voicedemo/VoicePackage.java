@@ -1,4 +1,4 @@
-package com.voicetest;
+package com.janreyho.voicedemo;
 
 import android.widget.Toast;
 

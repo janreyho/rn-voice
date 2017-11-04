@@ -1,7 +1,7 @@
-package com.voicetest; //包名
+package com.janreyho.voicedemo; //包名
 
-import com.voicetest.recognization.RecogResult;
-import com.voicetest.control.ErrorTranslation;
+import com.janreyho.voicedemo.recognization.RecogResult;
+import com.janreyho.voicedemo.control.ErrorTranslation;
 
 import android.Manifest;
 import android.content.pm.PackageManager;

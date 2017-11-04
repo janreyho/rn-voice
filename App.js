@@ -10,7 +10,7 @@ import {
 
 import Voice from './react-native-voice';
 
-export default class VoiceTest extends Component {
+export default class voicedemo extends Component {
   constructor(props) {
     super(props);
     this.state = {

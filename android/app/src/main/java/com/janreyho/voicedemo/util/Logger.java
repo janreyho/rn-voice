@@ -1,4 +1,4 @@
-package com.voicetest.util;
+package com.janreyho.voicedemo.util;
 
 import android.os.Handler;
 import android.os.Message;

@@ -1,4 +1,4 @@
-package com.voicetest.recognization;
+package com.janreyho.voicedemo.recognization;
 
 /**
  * Created by fujiayi on 2017/6/14.

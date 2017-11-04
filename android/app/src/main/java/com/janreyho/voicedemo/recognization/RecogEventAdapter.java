@@ -1,11 +1,11 @@
-package com.voicetest.recognization;
+package com.janreyho.voicedemo.recognization;
 
 import android.util.Log;
 
-import com.voicetest.control.ErrorTranslation;
+import com.janreyho.voicedemo.control.ErrorTranslation;
 import com.baidu.speech.EventListener;
 import com.baidu.speech.asr.SpeechConstant;
-import com.voicetest.util.Logger;
+import com.janreyho.voicedemo.util.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
