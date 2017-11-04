@@ -1,11 +1,11 @@
-package com.androidtoast.recognization;
+package com.voicetest.recognization;
 
 import android.util.Log;
 
-import com.androidtoast.control.ErrorTranslation;
+import com.voicetest.control.ErrorTranslation;
 import com.baidu.speech.EventListener;
 import com.baidu.speech.asr.SpeechConstant;
-import com.androidtoast.util.Logger;
+import com.voicetest.util.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;

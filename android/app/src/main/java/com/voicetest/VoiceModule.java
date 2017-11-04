@@ -1,7 +1,7 @@
-package com.androidtoast; //包名
+package com.voicetest; //包名
 
-import com.androidtoast.recognization.RecogResult;
-import com.androidtoast.control.ErrorTranslation;
+import com.voicetest.recognization.RecogResult;
+import com.voicetest.control.ErrorTranslation;
 
 import android.Manifest;
 import android.content.pm.PackageManager;

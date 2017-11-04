@@ -1,4 +1,4 @@
-package com.androidtoast.recognization;
+package com.voicetest.recognization;
 
 /**
  * Created by fujiayi on 2017/6/14.
@@ -6,7 +6,7 @@ package com.androidtoast.recognization;
 
 import android.util.Log;
 
-import com.androidtoast.util.Logger;
+import com.voicetest.util.Logger;
 
 public class StatusRecogListener implements IRecogListener, IStatus {
 

@@ -1,4 +1,4 @@
-package com.androidtoast.recognization;
+package com.voicetest.recognization;
 
 /**
  * Created by fujiayi on 2017/6/14.
