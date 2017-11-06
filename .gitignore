@@ -9,7 +9,6 @@ node_modules
 .mtj.tmp/
 
 # Package Files #
-*.jar
 
 build/
 VoiceModule.iml
