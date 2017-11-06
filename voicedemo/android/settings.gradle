@@ -1,3 +1,6 @@
 rootProject.name = 'voicedemo'
 
+include ':rn-voice'
+project(':rn-voice').projectDir = new File(rootProject.projectDir, '../node_modules/rn-voice/android')
+
 include ':app'

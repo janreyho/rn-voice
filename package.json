@@ -1,5 +1,5 @@
 {
-  "name": "react-native-voice",
+  "name": "rn-voice",
   "version": "0.0.1",
   "description": "React Native Native Voice library for iOS and Android",
   "main": "index.js",
@@ -23,3 +23,5 @@
   },
   "license": "MIT"
 }
+
+
