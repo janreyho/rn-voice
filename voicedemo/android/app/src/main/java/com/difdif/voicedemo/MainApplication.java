@@ -1,14 +1,13 @@
-package com.janreyho.voicedemo;
+package com.difdif.voicedemo;
 
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
+import com.janreyho.voice.VoicePackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
-
-import com.janreyho.voice.VoicePackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,8 +23,8 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
-          new MainReactPackage(),
-          new VoicePackage() // 这个类是我们创建的
+          new VoicePackage(),
+          new MainReactPackage()
       );
     }
 

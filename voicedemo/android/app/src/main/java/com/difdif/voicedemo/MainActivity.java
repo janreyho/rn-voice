@@ -1,4 +1,4 @@
-package com.janreyho.voicedemo;
+package com.difdif.voicedemo;
 
 import com.facebook.react.ReactActivity;
 

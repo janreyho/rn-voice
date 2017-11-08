@@ -95,10 +95,10 @@ def enableProguardInReleaseBuilds = false
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "25.0.0"
+    buildToolsVersion "23.0.1"
 
     defaultConfig {
-        applicationId "com.janreyho.voicedemo"
+        applicationId "com.difdif.voicedemo"
         minSdkVersion 16
         targetSdkVersion 22
         versionCode 1
@@ -115,18 +115,9 @@ android {
             include "armeabi-v7a", "x86"
         }
     }
-    signingConfigs {
-        release {
-            storeFile file ("my-release-key.keystore")
-            storePassword "123456"
-            keyAlias "my-key-alias"
-            keyPassword "12345678"
-        }
-    }
     buildTypes {
         release {
             minifyEnabled enableProguardInReleaseBuilds
-            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
